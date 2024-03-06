@@ -1,14 +1,15 @@
-﻿using Application.Students.Handler;
+﻿using Application.Students.Commands;
+using Application.Students.Handler;
 using Application.Students.Models;
 using Application.Students.Querys;
+using Domain.Entities;
+using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Students.Models;
 
 namespace Students.Controllers
 {
-    [ApiVersion("1.0")]
-    [Route("api/v{version:apiVersion}/[controller]")]
+    [Route("/api/[controller]")]
     [ApiController]
     public class StudentController : ControllerBase
     {
@@ -19,50 +20,85 @@ namespace Students.Controllers
         }
 
 
-        public List<Student> Students = new List<Student>
-        {
-            new Student (),
-            new Student () {Id=5,Name="mehdi",Description="test"},
-            new Student () {Id=6,Name="mehdi2",Description="test2"}
-
-        };
-        [MapToApiVersion("1.0")]
-        [HttpGet("GetAll")]
-        public IActionResult getAnonym()
-        {
-
-            return Ok(new { id = 1, nom = "mehdi" });
-        }
-        [HttpGet("{id:int}")]// Query
+        [HttpGet("{id}")]// Query
         [ProducesResponseType(typeof(StudentModel), 200)]
-        public async Task<IActionResult> GetSingle( [FromRoute] int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetSingle([FromRoute] string id, CancellationToken cancellationToken)
         {
-            //return Ok(new { id = 1, nom = "mehdi" });
             // Preparation de Query 
             var quer = new GetStudentByIdQuery()
             {
                 Id = id,
             };
 
-            // 2 Appleler le handler 
-            //   var hanler = new GetStudentByIdQueryHandler();
-            // var result = await hanler.Handle(quer, cancellationToken);
+            var resut = await Sender.Send(quer, cancellationToken);
 
-            var resut = await Sender.Send(quer, cancellationToken) ;
-
-            if(resut.IsFailed)
-            { return Problem(detail: resut.Errors[0].Message); }
-            //return Ok(Students.FirstOrDefault(s => s.Id==id));
+            if (resut.IsFailed)
+            { 
+                return Problem(detail: string.Join(" ,",resut.Errors.ConvertAll(x=> x.Message)));
+            }
+            
             return Ok(resut.Value);
+        }
+        [HttpPost]
+        [ProducesResponseType(typeof(string), 200)]
+        public async Task<IActionResult> CreateStudent([FromBody] StudentModel model, CancellationToken cancellationToken)
+        {
+            var command = new CreateStudentCommand
+            {
+                Name = model.Name,
+                Description = model.Description
+            };
 
+            var result = await Sender.Send(command, cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                return Ok(result.Value);
+            }
+            else
+            {
+                return BadRequest(result.Errors);
+            }
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetAllStudents(CancellationToken cancellationToken)
+        {
+            var query = new GetAllStudentsQuery();
+            var result = await Sender.Send(query,cancellationToken) ;
+
+            if (result.IsSuccess)
+            {
+                return Ok(result.Value);
+            }
+            else
+            {
+                return BadRequest(result.Errors);
+            }
+        }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteStudent(string id,CancellationToken cancellationToken)
+        {
+            var command = new DeleteStudentCommand
+            {
+                Id = id
+            };
+
+            var result = await Sender.Send(command,cancellationToken);
+           
+            if (result.IsSuccess)
+            {
+                return NoContent(); 
+            }
+            else
+            {
+                return BadRequest(result.Errors);
+            }
         }
 
-
     }
-   
- }
+}
 
 
 
-    
+
 

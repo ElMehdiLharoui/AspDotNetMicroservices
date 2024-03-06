@@ -11,10 +11,7 @@ namespace Students.Options
         private readonly IApiVersionDescriptionProvider _provider;
         public void Configure(SwaggerGenOptions options)
         {
-            foreach (var description in _provider.ApiVersionDescriptions)
-            {
-                options.SwaggerDoc(description.GroupName,CreateVersionInfo(description));
-            }
+            
 
         }
 

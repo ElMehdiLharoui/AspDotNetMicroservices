@@ -1,4 +1,5 @@
 ﻿using Domain.Reposotires;
+using Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -11,10 +12,9 @@ namespace Infrastructure
 {
     public static class DependencyInjection
     {
-        public static void AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+        public static void AddInfrastructure(this IServiceCollection services)
         {
-
-            services.AddScoped<IReposotoryStudent, MongoRepositoryStudent>();
+            services.AddScoped<IRepositoryStudent, MongoRepositoryStudent>();
         }
     }
 }

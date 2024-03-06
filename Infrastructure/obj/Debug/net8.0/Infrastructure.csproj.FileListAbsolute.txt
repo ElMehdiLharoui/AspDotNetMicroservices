@@ -13,3 +13,4 @@ C:\Users\ELMEHDI\source\repos\School\Infrastructure\obj\Debug\net8.0\Infrastruct
 C:\Users\ELMEHDI\source\repos\School\Infrastructure\obj\Debug\net8.0\refint\Infrastructure.dll
 C:\Users\ELMEHDI\source\repos\School\Infrastructure\obj\Debug\net8.0\Infrastructure.pdb
 C:\Users\ELMEHDI\source\repos\School\Infrastructure\obj\Debug\net8.0\ref\Infrastructure.dll
+C:\Users\ELMEHDI\source\repos\School\Infrastructure\obj\Debug\net8.0\Infrastructure.sourcelink.json

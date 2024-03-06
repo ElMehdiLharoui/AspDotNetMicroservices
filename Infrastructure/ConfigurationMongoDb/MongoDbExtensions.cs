@@ -13,14 +13,10 @@ namespace Infrastructure
     {
         public static void AddMongoDb(this IServiceCollection services, IConfiguration configuration)
         {
-            var mongoDbConfig = new MongoDbConfiguration
-            {
-                ConnectionString = configuration.GetConnectionString("MongoDbAtlas"),
-                DatabaseName = "VotreNomDeBaseDeDonnees" // Remplacez par le nom de votre base de données
-            };
+            var mongoDbConfig = configuration.GetSection("ConnectionStrings").Get<MongoDbConfiguration>();
 
             services.AddSingleton(sp => new MongoClient(mongoDbConfig.ConnectionString));
-            services.AddScoped(sp => sp.GetRequiredService<IMongoClient>().GetDatabase(mongoDbConfig.DatabaseName));
+            services.AddScoped(sp => sp.GetRequiredService<MongoClient>().GetDatabase(mongoDbConfig.DatabaseName));
         }
     }
 }

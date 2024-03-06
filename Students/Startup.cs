@@ -1,4 +1,6 @@
-﻿using Application.Students.Handler;
+﻿using Application.Common;
+using Application.Common.Mappings;
+using Application.Students.Handler.Querys;
 using Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -24,70 +26,48 @@ namespace Students
             // services.AddMediatR(typeof(GetStudentByIdQueryHandler).GetTypeInfo().Assembly);
             // services.AddMediatR(AppDomain.CurrentDomain.GetAssemblies());
             services.AddConfigureHandler();
-
+            services.AddInfrastructure();
+            
             services.AddMongoDb(Configuration);
 
-            services.AddAutoMapper(typeof(AutoMapperProfile));
+            services.AddAutoMapper(typeof(MappingProfile));
             services.AddMediatR(AppDomain.CurrentDomain.GetAssemblies());
-            Console.WriteLine("Le gestionnaire de requête est dans les assemblies chargées.");
+
             services.AddLogging(configure =>
             {
                 configure.AddConsole(); // Ajoute la sortie console
             });
-            services.AddApiVersioning(options =>
-            {
-                options.DefaultApiVersion = new ApiVersion(2, 0);
-                options.AssumeDefaultVersionWhenUnspecified = true;
-                options.ReportApiVersions = true;
-                options.ApiVersionReader = new UrlSegmentApiVersionReader();
-            });
-            services.AddVersionedApiExplorer(options =>
-            {
-                options.GroupNameFormat = "'v'VVV";
-                options.SubstituteApiVersionInUrl = true;
-            });
 
+         
+            services.AddEndpointsApiExplorer();
             services.AddSingleton(Configuration);
             services.AddControllers();
-            services.AddSwaggerGen(
-           /*   c =>
-                {
-                    c.SwaggerDoc(
-                        "V1",
-                        new OpenApiInfo
-                            {
-                            Title = "mon titre",
-                            Version = "v1",
-
-                        });
-                    c.CustomOperationIds(
-                        api =>
-                        {
-                            var  description = api.ActionDescriptor as ControllerActionDescriptor;// convertire tout les paramtere qui existe dans le controller
-                            return $"{description?.ControllerName}_{description?.ActionName}"; // formter une chaine de caractere en c# le svariable avec les chaines 
-
-                        });
-                    c.CustomSchemaIds
-                }*/
-                );
+            services.AddSwaggerGen();
             CheckAssemblyTypes();
 
         }
         // Midlwears
-        public  void Configure(IApplicationBuilder app, IHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostEnvironment env)
         {
             if(env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
+;
+            app.UseHttpsRedirection();
             app.UseRouting();
+            app.UseCors("AllowOrigin");
+
             app.UseEndpoints(endpoints=> {
                 endpoints.MapControllers();
-                });
+            });
+
             app.UseSwagger();
             app.UseSwaggerUI(op =>
             {
+                op.SwaggerEndpoint("/swagger/v1/swagger.json", "STD API");
             });
+
             CheckAssemblyTypes();
         }
         private void CheckAssemblyTypes()
@@ -99,7 +79,7 @@ namespace Students
             var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies();
 
             // Obtenez l'assembly de GetStudentByIdQueryHandler
-            var handlerAssembly = typeof(Application.Students.Handler.GetStudentByIdQueryHandler).Assembly;
+            var handlerAssembly = typeof(GetStudentByIdQueryHandler).Assembly;
 
             // Vérifiez si l'assembly du gestionnaire est parmi les assemblies chargées
             var handlerAssemblyLoaded = loadedAssemblies.Any(loadedAssembly => loadedAssembly == handlerAssembly);

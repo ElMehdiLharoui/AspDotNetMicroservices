@@ -11,6 +11,6 @@ namespace Application.Students.Querys
 {
     public class GetStudentByIdQuery : IRequest<Result<StudentModel>>
     {
-        public int Id { get; set; } = 0;
+        public string Id { get; set; } = string.Empty;
     }
 }
